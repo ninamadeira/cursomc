@@ -1,16 +1,26 @@
 package com.madeira.cursomc.resources;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.madeira.cursomc.domain.Categoria;
+
 @RestController
-@RequestMapping(value="/categorias")
+@RequestMapping(value = "/categorias")
 public class CategoriaResource {
-	
+
 	@GetMapping
-	public String listar() {
-		return "REST está funcionando!";
+	public List<Categoria> listar() {
+
+		List<Categoria> lista = new ArrayList<>();
+		lista.add(new Categoria(1, "Informática"));
+		lista.add(new Categoria(2, "Escritório"));
+
+		return lista;
 	}
 
 }
