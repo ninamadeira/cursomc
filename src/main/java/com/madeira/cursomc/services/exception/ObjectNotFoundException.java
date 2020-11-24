@@ -1,4 +1,4 @@
-package com.madeira.cursomc.resources.exception;
+package com.madeira.cursomc.services.exception;
 
 public class ObjectNotFoundException extends RuntimeException {
 
