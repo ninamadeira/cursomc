@@ -1,4 +1,4 @@
-package com.madeira.cursomc.domain.enuns;
+package com.madeira.cursomc.domain.enums;
 
 public enum TipoCliente {
 	PESSOAFISICA(1, "Pessoa Física"), PESSOAJURIDICA(2, "Pessoa Jurídica");
