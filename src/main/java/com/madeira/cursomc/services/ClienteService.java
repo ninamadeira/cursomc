@@ -15,11 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.madeira.cursomc.domain.Cidade;
 import com.madeira.cursomc.domain.Cliente;
 import com.madeira.cursomc.domain.Endereco;
+import com.madeira.cursomc.domain.enums.Perfil;
 import com.madeira.cursomc.domain.enums.TipoCliente;
 import com.madeira.cursomc.dto.ClienteDTO;
 import com.madeira.cursomc.dto.ClienteNewDTO;
 import com.madeira.cursomc.repositories.ClienteRepository;
 import com.madeira.cursomc.repositories.EnderecoRepository;
+import com.madeira.cursomc.security.UserSS;
+import com.madeira.cursomc.services.exception.AuthorizationException;
 import com.madeira.cursomc.services.exception.DataIntegrityException;
 import com.madeira.cursomc.services.exception.ObjectNotFoundException;
 
@@ -36,6 +39,11 @@ public class ClienteService {
 	private BCryptPasswordEncoder pe;
 
 	public Cliente find(Integer id) {
+		UserSS user = UserService.authenticated();
+		if (user==null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));

@@ -4,8 +4,12 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.madeira.cursomc.domain.Cliente;
 import com.madeira.cursomc.domain.ItemPedido;
 import com.madeira.cursomc.domain.PagamentoComBoleto;
 import com.madeira.cursomc.domain.Pedido;
@@ -13,6 +17,8 @@ import com.madeira.cursomc.domain.enums.EstadoPagamento;
 import com.madeira.cursomc.repositories.ItemPedidoRepository;
 import com.madeira.cursomc.repositories.PagamentoRepository;
 import com.madeira.cursomc.repositories.PedidoRepository;
+import com.madeira.cursomc.security.UserSS;
+import com.madeira.cursomc.services.exception.AuthorizationException;
 import com.madeira.cursomc.services.exception.ObjectNotFoundException;
 
 @Service
@@ -25,9 +31,6 @@ public class PedidoService {
 	private BoletoService boletoService;
 
 	@Autowired
-	private ClienteService clienteService;
-
-	@Autowired
 	private PagamentoRepository pagamentoRepository;
 
 	@Autowired
@@ -35,9 +38,18 @@ public class PedidoService {
 
 	@Autowired
 	private ProdutoService produtoService;
-	
+
+	@Autowired
+	private ClienteService clienteService;
+
 	@Autowired
 	private EmailService emailService;
+
+	public Pedido find(Integer id) {
+		Optional<Pedido> obj = repo.findById(id);
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
+				"Objeto não encontrado! Id: " + id + ", Tipo: " + Pedido.class.getName()));
+	}
 
 	public Pedido insert(Pedido obj) {
 		obj.setId(null);
@@ -62,10 +74,13 @@ public class PedidoService {
 		return obj;
 	}
 
-	public Pedido find(Integer id) {
-		Optional<Pedido> obj = repo.findById(id);
-		return obj.orElseThrow(() -> new ObjectNotFoundException(
-				"Objeto não encontrado! Id: " + id + ", Tipo: " + Pedido.class.getName()));
+	public Page<Pedido> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
+		UserSS user = UserService.authenticated();
+		if (user == null) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
+		Cliente cliente = clienteService.find(user.getId());
+		return repo.findByCliente(cliente, pageRequest);
 	}
-
 }
